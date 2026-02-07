@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corazón de Amor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+        }
+        
+        .container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .heart-wrapper {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: heartbeat 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(255, 105, 180, 0.5)) drop-shadow(0 0 60px rgba(255, 20, 147, 0.3));
+        }
+        
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            20% { transform: scale(1.1); }
+            40% { transform: scale(1); }
+        }
+        
+        svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.4));
+        }
+        
+        .heart-path {
+            fill: url(#heartGradient);
+            stroke: none;
+        }
+        
+        .text-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        .title {
+            margin-top: 40px;
+            font-family: 'Great Vibes', cursive;
+            font-size: 48px;
+            color: #ff69b4;
+            text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+            letter-spacing: 2px;
+        }
+        
+        /* Partículas flotantes */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+        
+        .particle {
+            position: absolute;
+            font-size: 24px;
+            animation: float 3s ease-in-out infinite;
+            opacity: 0.6;
+        }
+        
+        .p1 { top: 5%; left: 10%; animation-delay: 0s; }
+        .p2 { top: 15%; right: 15%; animation-delay: 0.5s; }
+        .p3 { bottom: 20%; left: 20%; animation-delay: 1s; }
+        .p4 { bottom: 10%; right: 10%; animation-delay: 1.5s; }
+    </style>
+</head>
+<body>
+    <div class="particle p1">💕</div>
+    <div class="particle p2">💖</div>
+    <div class="particle p3">💗</div>
+    <div class="particle p4">💝</div>
+    
+    <div class="container">
+        <div class="heart-wrapper">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#ff1493;stop-opacity:1" />
+                        <stop offset="50%" style="stop-color:#ff69b4;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#ff6fa5;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <path class="heart-path" d="M50,90 C20,70 5,55 5,40 C5,25 15,15 25,15 C35,15 45,25 50,35 C55,25 65,15 75,15 C85,15 95,25 95,40 C95,55 80,70 50,90 Z"/>
+            </svg>
+            
+            <canvas id="textCanvas"></canvas>
+        </div>
+        
+        <h1 class="title">te amo</h1>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('textCanvas');
+        const ctx = canvas.getContext('2d');
+        const wrapper = document.querySelector('.heart-wrapper');
+        
+        // Obtener dimensiones del contenedor
+        function resizeCanvas() {
+            const rect = wrapper.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            drawTextHeart();
+        }
+        
+        // Función para verificar si un punto está en el corazón usando path
+        function isPointInHeart(x, y) {
+            const svg = document.querySelector('svg');
+            const path = document.querySelector('.heart-path');
+            const rect = svg.getBoundingClientRect();
+            const canvasRect = canvas.getBoundingClientRect();
+            
+            // Convertir coordenadas del canvas a coordenadas SVG
+            const svgX = ((x - canvasRect.left + (canvasRect.width - rect.width) / 2) / rect.width) * 100;
+            const svgY = ((y - canvasRect.top + (canvasRect.height - rect.height) / 2) / rect.height) * 100;
+            
+            // Usar isPointInPath de SVG
+            const pt = new DOMPoint(svgX, svgY);
+            return path.ownerSVGElement.createSVGPoint && path.isPointInFill ? path.isPointInFill(pt) : true;
+        }
+        
+        function drawTextHeart() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Estilos para el texto
+            ctx.font = 'bold 16px Poppins';
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            const text = 'te amo';
+            const spacing = 22;
+            
+            // Dibujar con patrón radial desde el centro
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            for (let angle = 0; angle < Math.PI * 2; angle += 0.15) {
+                for (let distance = 20; distance < 110; distance += spacing) {
+                    const x = centerX + Math.cos(angle) * distance;
+                    const y = centerY + Math.sin(angle) * distance;
+                    
+                    if (isPointInHeart(x, y)) {
+                        ctx.save();
+                        ctx.translate(x, y);
+                        ctx.rotate(angle + Math.PI / 2);
+                        ctx.fillText(text, 0, 0);
+                        ctx.restore();
+                    }
+                }
+            }
+        }
+        
+        // Dibujar texto en grilla más densa
+        function drawTextHeartGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.font = 'bold 15px Poppins';
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            const text = 'te amo';
+            const spacing = 20;
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            // Grilla rectangular
+            for (let y = centerY - 100; y < centerY + 100; y += spacing) {
+                for (let x = centerX - 100; x < centerX + 100; x += spacing) {
+                    try {
+                        if (isPointInHeart(x, y)) {
+                            ctx.fillText(text, x, y);
+                        }
+                    } catch(e) {}
+                }
+            }
+        }
+        
+        // Inicializar
+        resizeCanvas();
+        
+        // Redimensionar cuando sea necesario
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Redibujar continuamente para suavidad
+        setInterval(drawTextHeartGrid, 100);
+    </script>
+</body>
+</html>
